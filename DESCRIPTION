@@ -1,0 +1,40 @@
+Package: JTIMLmaster
+Type: Package
+Title: An application of ML methods
+Version: 0.1.0
+Authors@R: person(given = "Sangsoon",
+           family = "Woo",
+           role = c("aut", "cre"),
+           email = "Sangsoon.Woo@cytel.com")
+Description: This package is developped for JTI R training session. It shows how to apply machine learning methods to real world data sets. 
+License: What license is it under?
+Encoding: UTF-8
+LazyData: true
+Imports:
+	openxlsx,
+	dplyr,
+	plyr,
+	data.table (>= 1.9.4),
+	DT,
+	ggplot2,
+	RColorBrewer,
+	edgeR,
+	Biobase,
+	DESeq2,
+	car,
+	SmartSVA,
+	randomForest,
+	glmnet,
+	caret,
+	e1071,
+	VSURF,
+	neuralnet,
+	gbm,
+	pheatmap,
+	preprocessCore
+Suggests: 
+    knitr,
+    rmarkdown,
+    testthat
+VignetteBuilder: knitr
+RoxygenNote: 6.1.1
