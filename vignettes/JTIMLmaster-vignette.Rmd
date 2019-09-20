@@ -75,6 +75,7 @@ library(VSURF)
 library(neuralnet)
 library(gbm)
 library(verification)
+library(pROC)
 ```
 
 The following code is for filtering out genes by the estimated SD and Interquantile ranges. You can try to generate histogram of the estimated SD and Interquantile distributions. 
