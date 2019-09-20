@@ -1,7 +1,7 @@
 Package: JTIMLmaster
 Type: Package
 Title: An application of ML methods
-Version: 0.1.0
+Version: 1.0.0
 Authors@R: person(given = "Sangsoon",
            family = "Woo",
            role = c("aut", "cre"),
