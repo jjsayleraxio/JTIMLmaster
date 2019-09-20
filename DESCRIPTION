@@ -7,7 +7,7 @@ Authors@R: person(given = "Sangsoon",
            role = c("aut", "cre"),
            email = "Sangsoon.Woo@cytel.com")
 Description: This package is developped for JTI R training session. It shows how to apply machine learning methods to real world data sets. 
-License: What license is it under?
+License: GPL-3.0
 Encoding: UTF-8
 LazyData: true
 biocViews:
