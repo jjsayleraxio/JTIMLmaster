@@ -1,0 +1,118 @@
+## ---- include = FALSE----------------------------------------------------
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  fig.width=7, 
+  fig.height=5, 
+  fig.path='Figs/', 
+  fig.align="left",
+  warning=FALSE, 
+  message=FALSE,
+  comment = "#>"
+)
+
+## ----setup---------------------------------------------------------------
+library(JTIMLmaster)
+library(ggplot2)
+
+## ----displ vs hwy--------------------------------------------------------
+ggplot(data = mpg) + geom_point(mapping = aes(x = displ, y = hwy))
+
+ggplot(data = mpg) + geom_point(mapping = aes(x = displ, y = hwy, color=class))
+
+ggplot(data = mpg) + geom_point(mapping = aes(x = displ, y = hwy, size = class))
+
+ggplot(data = mpg) + geom_point(mapping = aes(x = displ, y = hwy, alpha = class))
+
+ggplot(data = mpg) + geom_point(mapping = aes(x = displ, y = hwy, shape = class))
+
+ggplot(data = mpg) + geom_point(mapping = aes(x = displ, y = hwy), color = "red")
+
+
+
+## ----Facet---------------------------------------------------------------
+ggplot(data = mpg) + geom_point(mapping = aes(x = displ, y = hwy)) + facet_wrap(~ class, nrow = 2)
+
+ggplot(data = mpg) + geom_point(mapping = aes(x = displ, y = hwy)) + facet_grid(drv ~ cyl)
+
+ggplot(data = mpg) + geom_point(mapping = aes(x = displ, y = hwy)) + facet_grid(. ~ cyl)
+
+ggplot(data = mpg) + geom_point(mapping = aes(x = displ, y = hwy)) + facet_grid(drv ~ .)
+
+
+## ----Smoothing-----------------------------------------------------------
+ggplot(data = mpg) +    geom_point(mapping = aes(x = displ, y = hwy))
+
+ggplot(data = mpg) + geom_smooth(mapping = aes(x = displ, y = hwy))
+
+ggplot(data = mpg) + geom_smooth(mapping = aes(x = displ, y = hwy, linetype = drv))  ## drv = drive train, 4=four-wheel drive, f=front-wheel drive, r=rear-wheel drive
+
+## ----summary of geom_smooth----------------------------------------------
+ggplot(data = mpg) + geom_smooth(mapping = aes(x = displ, y = hwy))
+
+ggplot(data = mpg) + geom_smooth(mapping = aes(x = displ, y = hwy, group = drv))
+
+ggplot(data = mpg) + geom_smooth(mapping = aes(x = displ, y = hwy, color = drv),show.legend = FALSE)
+
+ggplot(data = mpg) + geom_point(mapping = aes(x = displ, y = hwy)) + geom_smooth(mapping = aes(x = displ, y = hwy))
+
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + geom_point() + geom_smooth()
+
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + geom_point(mapping = aes(color = class)) + geom_smooth()
+
+
+## ----simple bar plot-----------------------------------------------------
+ggplot(data = diamonds) + geom_bar(mapping = aes(x = cut))
+
+## By counts 
+ggplot(data = diamonds) +stat_count(mapping = aes(x = cut))
+
+## By frequency 
+demo <- dplyr::tribble(
+~cut, ~freq,
+"Fair", 1610,
+"Good", 4906,
+"Very Good", 12082,
+"Premium", 13791,
+"Ideal", 21551
+)
+ggplot(data = demo) + geom_bar(mapping = aes(x = cut, y = freq), stat = "identity")
+
+## By proportion
+ggplot(data = diamonds) + geom_bar(mapping = aes(x = cut, y = ..prop.., group = 1))
+
+
+ggplot(data = diamonds) + geom_bar(mapping = aes(x = cut, colour = cut))
+
+ggplot(data = diamonds) + geom_bar(mapping = aes(x = cut, fill = cut))
+
+ggplot(data = diamonds) + geom_bar(mapping = aes(x = cut, fill = clarity))
+
+ggplot(data = diamonds, mapping = aes(x = cut, fill = clarity)) + geom_bar(alpha = 1/5, position = "identity") 
+
+ggplot(data = diamonds, mapping = aes(x = cut, colour = clarity)) + geom_bar(fill = NA, position = "identity")
+
+ggplot(data = diamonds) + geom_bar(mapping = aes(x = cut, fill = clarity), position = "fill")
+
+
+ggplot(data = diamonds) + geom_bar(mapping = aes(x = cut, fill = clarity), position = "dodge")
+
+
+
+## ----boxplot-------------------------------------------------------------
+ggplot(data = mpg, mapping = aes(x = class, y = hwy)) + geom_boxplot()
+
+ggplot(data = mpg, mapping = aes(x = class, y = hwy)) + geom_boxplot() + coord_flip()
+
+nz <- map_data("nz")
+ggplot(nz, aes(long, lat, group = group)) + geom_polygon(fill = "white", colour = "black")
+
+ggplot(nz, aes(long, lat, group = group)) + geom_polygon(fill = "white", colour = "black") + coord_quickmap()
+
+
+bar <- ggplot(data = diamonds) + geom_bar( mapping = aes(x = cut, fill = cut), show.legend = FALSE, width = 1) +
+theme(aspect.ratio = 1) + labs(x = NULL, y = NULL)
+
+bar + coord_flip()
+bar + coord_polar()
+
+

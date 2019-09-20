@@ -1,0 +1,259 @@
+---
+title: "Diabetes Data"
+author: "Sangsoon Woo, Cytel"
+date: "September 24, 2019"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Diabetes-Data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  fig.width=7, 
+  fig.height=5, 
+  fig.path='Figs/', 
+  fig.align="left",
+  warning=FALSE, 
+  message=FALSE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(JTIMLmaster)
+library(Biobase)
+library(DESeq2)
+library(edgeR)
+library(ggplot2)
+library(SmartSVA)
+library(pheatmap)
+library(data.table)
+library(plyr)
+library(dplyr)
+library(DT)
+library(car)
+library(randomForest)
+library(glmnet)
+library(caret)
+library(e1071)
+library(VSURF)
+library(neuralnet)
+library(gbm)
+library(verification)
+library(pROC)
+```
+
+# Introduction
+
+This dataset is originally from the National Institute of Diabetes and Digestive and Kidney Diseases. The objective of the dataset is to diagnostically predict whether or not a patient has diabetes, based on certain diagnostic measurements included in the dataset. Several constraints were placed on the selection of these instances from a larger database. In particular, all patients here are females at least 21 years old of Pima Indian heritage.
+
+# Data
+The datasets consists of several medical predictor variables and one target variable, Outcome. Predictor variables includes the number of pregnancies the patient has had, their BMI, insulin level, age, and so on.
+
+# Inspiration
+Can you build a machine learning model to accurately predict whether or not the patients in the dataset have diabetes or not?
+
+This vignette was created to show how to apply Machine Learning approaches into a diabete data 
+```{r ML application}
+diabetes_data$Outcome <- factor(diabetes_data$Outcome, levels = c("0", "1"))
+## The data name is diabetes_data 
+set.seed(415)
+K <- 10       ## Number of replicates 
+n.case <- which(diabetes_data$Outcome==1)
+n.control <- which(diabetes_data$Outcome==0)
+
+train_rows <- lapply(1:K, function(x){c(sample(n.case, length(n.case), replace = TRUE), sample(n.control, length(n.control), replace = TRUE))})
+
+depVar <- "Outcome"
+
+alphaLevel <- c(0.4, 0.7, 1)
+
+ntree <- 100
+
+RFresult <- lapply(train_rows, function(x){RF.boot.err.Func(train=diabetes_data[x, ], test=diabetes_data[-x, ], depVar = depVar, ntree=ntree)})
+names(RFresult) <- paste0("RF_iter", 1:K)
+
+PRresult <- lapply(train_rows, function(x){PR.boot.err.Func(x.train=diabetes_data[x, (names(diabetes_data)!=depVar)], y.train=diabetes_data[x, depVar], x.test=diabetes_data[-x, (names(diabetes_data)!=depVar)], y.test=diabetes_data[-x, depVar], alphaLevel=alphaLevel, family="binomial", type="class")})
+names(PRresult) <- paste0("PR_iter", 1:K)
+
+### SVM ###
+SVMresult  <-  lapply(train_rows, function(x){SVM.boot.err.Func(train=diabetes_data[x, ], test=diabetes_data[-x, ], depVar= depVar, kernel="radial", cost=5)})
+names(SVMresult) <- paste0("SVM_iter", 1:K)
+
+### Neural Network ###
+NNresult  <-  lapply(train_rows, function(x){NN.boot.err.Func(train=diabetes_data[x, ], test=diabetes_data[-x, ], depVar= depVar, hidden=10)})
+names(NNresult) <- paste0("NN_iter", 1:K)
+
+### Gredient Boosting (gbm R package) ###
+### Somehow predicted values are all 0. So we cannot compare them to the true values. 
+
+GBMresult  <-  lapply(train_rows, function(x){GBM.boot.err.Func(train=diabetes_data[x, ], test=diabetes_data[-x, ], depVar= depVar, distribution="adaboost", n.trees = ntree)})
+names(GBMresult) <- paste0("GBM_iter", 1:K)
+```
+
+## 1. Random Forest 
+
+### 1) Accuracy measures
+The following plot and table show the estimated accuracy measures and misclassification across all replicates. 
+```{r RF result summary}
+RF.err.measure <- data.frame(AUC=unlist(lapply(RFresult, function(x){x$RF.err[1,"overall"]})),
+                             Sensitivity= unlist(lapply(RFresult, function(x){x$RF.err[2,"overall"]})),
+                             Specificity= unlist(lapply(RFresult, function(x){x$RF.err[3,"overall"]})),
+                             Misclassification= unlist(lapply(RFresult, function(x){x$RF.err[4,"overall"]})))
+RF.err.measure.melt <- melt(RF.err.measure)
+names(RF.err.measure.melt) <- c("accuracy.measure", "value")
+RF.err.measure.melt$accuracy.measure <- factor(RF.err.measure.melt$accuracy.measure, levels = c("AUC", "Sensitivity", "Specificity", "Misclassification"))
+
+ggplot(RF.err.measure.melt) + geom_boxplot(aes(x=accuracy.measure, y=value*100, fill=accuracy.measure)) + ggtitle(paste0("Random Forest (K=", K, ", ntree=", ntree, ")")) + ylab("percentage(%)")
+```
+
+
+```{r Distribution of accuracy measures}
+tempD <- ddply(RF.err.measure.melt, ~ accuracy.measure, summarise, mean= round(mean(value), digits = 4), sd=round(sd(value), digits = 4))
+tempD$value <- paste0(tempD$mean, " (sd=", tempD$sd, ")")
+tempD$mean <- tempD$sd <- NULL
+DT::datatable(tempD, caption = paste0("Mean(SD) of Overall Accuracy Measures using RF (K=", K, ")"), rownames = FALSE)
+```
+
+### 2) Importance Measures
+The following table shows their importance measures, which were ordered by mean of decreases accuracy. Top ranked variables will be included in the final model. 
+```{r importance measures for RF}
+all.important.measure <- lapply(RFresult, function(x){x$importance_measure[order(rownames(x$importance_measure)),]})
+all.important.measure.DF <- do.call("cbind", all.important.measure)
+
+all.important.measure.mean.decrease.acc.mean <- apply(all.important.measure.DF[, grep("Mean.Decrease.Accuracy", names(all.important.measure.DF))], 1, mean)
+all.important.measure.mean.Decrease.Gini.mean <- apply(all.important.measure.DF[, grep("Mean.Decrease.Gini", names(all.important.measure.DF))], 1, mean)
+
+important_measure_mean <- data.frame(Mean.Decrease.Accurary=round(all.important.measure.mean.decrease.acc.mean, 4), Mean.Decrease.Gini=round(all.important.measure.mean.Decrease.Gini.mean, 4))
+important_measure_mean <- important_measure_mean[order(important_measure_mean$Mean.Decrease.Accurary, decreasing = TRUE),]
+
+DT::datatable(important_measure_mean, caption = paste0("Mean of Importance Measures from Random Forest (K=", K, ")"))
+```
+
+## 2. Penalized Linear Regression  
+### 1) Overall Accuracy measure  
+The following plot and table show the estimated accurasy measures averaged over all replicates based on penalized linear regression models with different tuning parameters.
+```{r PR result, fig.height=6, fig.width=12}
+## For each iteration, Penalized Regression run returns a matrix of ModelXerr.measures
+## 1. Combine them across all K iterations. This returns a matrix of ModelxK dimension for each element
+## 2. Plot the error.measure of AUC, Sensitivity, Sepecificity, and MC and faceted by Model
+PR.err.measure <- list(AUC=do.call("rbind", lapply(PRresult, function(x){x$PR.err.vect["AUC.overall",]})),
+                             Sensitivity= do.call("rbind", lapply(PRresult, function(x){x$PR.err.vect["sensitivity.overall",]})),
+                             Specificity= do.call("rbind", lapply(PRresult, function(x){x$PR.err.vect["specificity.overall",]})),
+                             Misclassification= do.call("rbind", lapply(PRresult, function(x){x$PR.err.vect["misclassification.overall",]})))
+
+PR.err.measure <- lapply(PR.err.measure, function(x){as.data.frame(t(x), row.names = c("Elastic Net(alpha=0.4)", "Elastic Net(alpha=0.7)", "LASSO(alpha=1)"))})
+
+PR.err.measure.DF <- do.call("cbind", PR.err.measure)
+PR.err.measure.DF$Model <- rownames(PR.err.measure.DF)
+PR.err.measure.DF.melt <- melt(PR.err.measure.DF, id="Model")
+PR.err.measure.DF.melt$variable <- factor(unlist(lapply(strsplit(as.character(PR.err.measure.DF.melt$variable), "[.]"), function(x){x[[1]]})), levels=c("AUC", "Sensitivity", "Specificity", "Misclassification"))
+PR.err.measure.DF.melt$Model <- factor(PR.err.measure.DF.melt$Model, levels=c("Elastic Net(alpha=0.4)", "Elastic Net(alpha=0.7)", "LASSO(alpha=1)"))
+
+ggplot(PR.err.measure.DF.melt) + geom_boxplot(aes(x=variable, y=value*100,fill=variable)) + facet_grid(~ Model)+ ylab("percentage(%)") + ggtitle(paste0("Penalized Regressions (K=", K, ", Lasso/EN)")) + ylab("percentage(%)")
+
+## 3. Mean and SD of error.measures for each Model
+PR.err.measure.mean <- do.call("cbind", lapply(PR.err.measure, function(x){paste0(round(apply(x, 1, mean), 4), " (sd=", round(apply(x, 1, sd), 4), ")")}))
+rownames(PR.err.measure.mean) <- c("Elastic Net(alpha=0.4)", "Elastic Net(alpha=0.7)", "LASSO(alpha=1)")
+DT::datatable(PR.err.measure.mean, caption = paste0("Mean (SD) of Accuracy Measures using Penalized Regression, K=", K, ")"), rownames = TRUE)              
+```
+
+### 2) Non-Zero coefficients 
+The following table shows how many times each variable included in the mdoel was selected across all replicates. The variables are ranked by the frequency and top ranked ones will be used as predictors. 
+```{r Non zero coeffi for PR serum}
+## 4. non zero coefficients and cound them how many times each variable selected
+## For each model (alpha level), we order selected(non-zero coefficients) variables by their counts. 
+PR.non0coeff <- list(alphaLevel_04=lapply(PRresult, function(x){x$non0coeff[[1]]}),
+                     alphaLevel_07=lapply(PRresult, function(x){x$non0coeff[[2]]}),
+                     alphaLevel_1=lapply(PRresult, function(x){x$non0coeff[[3]]}))
+PR.non0coeff_variables <- list(alphaLevel_04=lapply(PRresult, function(x){names(x$non0coeff[[1]])}),
+                     alphaLevel_07=lapply(PRresult, function(x){names(x$non0coeff[[2]])}),
+                     alphaLevel_1=lapply(PRresult, function(x){names(x$non0coeff[[3]])}))
+union_non0coeff <- data.frame(Variables=unique(unlist(lapply(PR.non0coeff_variables, function(x){unlist(x)}))))
+
+union.all.non0coeff <- lapply(PR.non0coeff_variables, function(x){table(unlist(x))})
+union.all.non0coeff <- lapply(union.all.non0coeff, function(x){merge(union_non0coeff, data.frame(Variables= names(x), Counts=as.vector(x)), by="Variables", all.x=TRUE)})
+#union.all.non0coeff <- lapply(union.all.non0coeff, function(x){x[order(x$Counts, decreasing=TRUE),]})
+
+union.all.non0coeff_all <- merge(merge(union.all.non0coeff[[1]], union.all.non0coeff[[2]], by="Variables"), union.all.non0coeff[[3]], by="Variables")
+names(union.all.non0coeff_all) <- c("Variables", "alphaLevel=0.4", "alphaLevel=0.7", "alphaLevel=1")
+union.all.non0coeff_all <- union.all.non0coeff_all[order(union.all.non0coeff_all$`alphaLevel=0.4`, decreasing = TRUE),]
+union.all.non0coeff_all$Variables <- as.character(union.all.non0coeff_all$Variables)
+
+DT::datatable(union.all.non0coeff_all[-1,], rownames = FALSE, caption = paste0("Selected Variables and its counts for each alpha (K=", K, ")"))
+
+## Select top ranked genes having more than 70% out of K times selected in across all models ##
+## Estimate these genes' coefficients in Logistic model and then use them as Polygenic score for the new testing data (Marine data)
+polygenicGenes <- union.all.non0coeff_all$Variables[which(union.all.non0coeff_all$`alphaLevel=1`>=round(0.7*K))]
+polygenicGenes <- polygenicGenes[polygenicGenes!="(Intercept)"]
+```
+
+
+## 3. Support Vector Machine  
+The following plot and table show the estimated accuracy measures based on SVM. 
+```{r SVM result summary}
+SVM.err.measure <- data.frame(AUC=unlist(lapply(SVMresult, function(x){x$SVM.err[1,"overall"]})),
+                             Sensitivity= unlist(lapply(SVMresult, function(x){x$SVM.err[2,"overall"]})),
+                             Specificity= unlist(lapply(SVMresult, function(x){x$SVM.err[3,"overall"]})),
+                             Misclassification= unlist(lapply(SVMresult, function(x){x$SVM.err[4,"overall"]})))
+SVM.err.measure.melt <- melt(SVM.err.measure)
+names(SVM.err.measure.melt) <- c("accuracy.measure", "value")
+SVM.err.measure.melt$accuracy.measure <- factor(SVM.err.measure.melt$accuracy.measure, levels = c("AUC", "Sensitivity", "Specificity", "Misclassification"))
+
+ggplot(SVM.err.measure.melt) + geom_boxplot(aes(x=accuracy.measure, y=value*100, fill=accuracy.measure)) + ggtitle(paste0("Support Vector Machine (K=", K, ", Radial Kernal)")) + ylab("percentage(%)")
+```
+
+```{r SVM accuracy measures}
+tempD <- ddply(SVM.err.measure.melt, ~ accuracy.measure, summarise, mean= round(mean(value), digits = 4), sd=round(sd(value), digits = 4))
+tempD$value <- paste0(tempD$mean, " (sd=", tempD$sd, ")")
+tempD$mean <- tempD$sd <- NULL
+DT::datatable(tempD, caption = paste0("Mean(SD) of Overall Accuracy Measures using SVM (K=", K, ")"), rownames = FALSE)
+```
+
+
+## 4. Neural Network 
+The following plot and table show the estimated accuracy measures based on NN. 
+```{r Neural Network result summary}
+NN.err.measure <- data.frame(AUC=unlist(lapply(NNresult, function(x){x$NN.err[1,"overall"]})),
+                             Sensitivity= unlist(lapply(NNresult, function(x){x$NN.err[2,"overall"]})),
+                             Specificity= unlist(lapply(NNresult, function(x){x$NN.err[3,"overall"]})),
+                             Misclassification= unlist(lapply(NNresult, function(x){x$NN.err[4,"overall"]})))
+NN.err.measure.melt <- melt(NN.err.measure)
+names(NN.err.measure.melt) <- c("accuracy.measure", "value")
+NN.err.measure.melt$accuracy.measure <- factor(NN.err.measure.melt$accuracy.measure, levels = c("AUC", "Sensitivity", "Specificity", "Misclassification"))
+
+ggplot(NN.err.measure.melt) + geom_boxplot(aes(x=accuracy.measure, y=value*100, fill=accuracy.measure)) + ggtitle(paste0("Neural Network (K=", K, ", 10 layers)")) + ylab("percentage(%)")
+```
+
+```{r NN  accuracy measures}
+tempD <- ddply(NN.err.measure.melt, ~ accuracy.measure, summarise, mean= round(mean(value), digits = 4), sd=round(sd(value), digits = 4))
+tempD$value <- paste0(tempD$mean, " (sd=", tempD$sd, ")")
+tempD$mean <- tempD$sd <- NULL
+DT::datatable(tempD, caption = paste0("Mean(SD) of Overall Accuracy Measures using SVM (K=", K, ")"), rownames = FALSE)
+```
+
+## 5. Gredient Boosting 
+The following plot and table show the estimated accuracy measures based on GRM. 
+
+```{r Gredient Boosting result summary}
+GBM.err.measure <- data.frame(AUC=unlist(lapply(GBMresult, function(x){x$GBM.err[1,"overall"]})),
+                             Sensitivity= unlist(lapply(GBMresult, function(x){x$GBM.err[2,"overall"]})),
+                             Specificity= unlist(lapply(GBMresult, function(x){x$GBM.err[3,"overall"]})),
+                             Misclassification= unlist(lapply(GBMresult, function(x){x$GBM.err[4,"overall"]})))
+GBM.err.measure.melt <- melt(GBM.err.measure)
+names(GBM.err.measure.melt) <- c("accuracy.measure", "value")
+GBM.err.measure.melt$accuracy.measure <- factor(GBM.err.measure.melt$accuracy.measure, levels = c("AUC", "Sensitivity", "Specificity", "Misclassification"))
+
+ggplot(GBM.err.measure.melt) + geom_boxplot(aes(x=accuracy.measure, y=value*100, fill=accuracy.measure)) + ggtitle(paste0("Gredient Boosting (K=", K, ")")) + ylab("percentage(%)")
+```
+
+```{r GBM  accuracy measures}
+tempD <- ddply(GBM.err.measure.melt, ~ accuracy.measure, summarise, mean= round(mean(value), digits = 4), sd=round(sd(value), digits = 4))
+tempD$value <- paste0(tempD$mean, " (sd=", tempD$sd, ")")
+tempD$mean <- tempD$sd <- NULL
+DT::datatable(tempD, caption = paste0("Mean(SD) of Overall Accuracy Measures using SVM (K=", K, ")"), rownames = FALSE)
+```
