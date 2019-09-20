@@ -93,7 +93,7 @@ ggplot(data = diamonds) + geom_bar(mapping = aes(x = cut))
 ggplot(data = diamonds) +stat_count(mapping = aes(x = cut))
 
 ## By frequency 
-demo <- tribble(
+demo <- dplyr::tribble(
 ~cut, ~freq,
 "Fair", 1610,
 "Good", 4906,
