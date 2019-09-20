@@ -25,7 +25,7 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 library(JTIMLmaster)
-library(tidyverse)
+library(ggplot2)
 ```
 
 # Introduction
