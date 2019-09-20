@@ -44,20 +44,20 @@ ML_error <- function(data, newdata, importance_measure, add.vars = NULL, rdit = 
     for (i in 1:length(importance_measure)) {
         if (ML == "RF") {
             RF.tempVars <- (importance_measure)[[i]]
-            RF.fit <- randomForest(as.factor(PTSD_binary) ~ ., data = data[, which(names(data) %in% c(depVar, RF.tempVars))])
+            RF.fit <- randomForest::randomForest(as.factor(PTSD_binary) ~ ., data = data[, which(names(data) %in% c(depVar, RF.tempVars))])
             RF.pred <- predict(RF.fit, newdata = newdata[, -which(names(newdata) %in% depVar)], type = "prob")[, 2]
             ML.err.vect[i, "ML.err"] <- round(roc.area(as.numeric(newdata[, depVar]) - 1, RF.pred)$A, digits = rdit)
-            ML.Confusion[[i]] <- confusionMatrix(as.factor(ifelse(RF.pred > 0.5, 1, 0)), newdata[, which(names(newdata) %in% depVar)])
+            ML.Confusion[[i]] <- caret::confusionMatrix(as.factor(ifelse(RF.pred > 0.5, 1, 0)), newdata[, which(names(newdata) %in% depVar)])
             ML.err.vect[i, 1] <- paste0(RF.tempVars, collapse = ", ")
         }
 
         if (ML == "BOOST") {
             BOOST.tempVars <- (importance_measure)[1:i]
-            BOOST.fit <- gbm((PTSD_binary) ~ ., data = data[, which(names(data) %in% c(depVar, BOOST.tempVars))], distribution = "bernoulli",
+            BOOST.fit <- gbm::gbm((PTSD_binary) ~ ., data = data[, which(names(data) %in% c(depVar, BOOST.tempVars))], distribution = "bernoulli",
                 n.trees = 10000, shrinkage = 0.01, interaction.depth = 2)
-            BOOST.pred <- predict(BOOST.fit, newdata = newdata[, -which(names(newdata) %in% depVar)], n.trees = 10000, type = "response")
+            BOOST.pred <- stats::predict(BOOST.fit, newdata = newdata[, -which(names(newdata) %in% depVar)], n.trees = 10000, type = "response")
             ML.err.vect[i, "ML.err"] <- round(roc.area(as.numeric(newdata[, depVar]) - 1, Logistic.pred)$A, digits = rdit)
-            ML.Confusion[[i]] <- confusionMatrix(as.factor(ifelse(BOOST.pred > 0.5, 1, 0)), newdata[, which(names(newdata) %in% depVar)])
+            ML.Confusion[[i]] <- caret::confusionMatrix(as.factor(ifelse(BOOST.pred > 0.5, 1, 0)), newdata[, which(names(newdata) %in% depVar)])
             ML.err.vect[i, 1] <- paste0(BOOST.tempVars, collapse = ", ")
         }
 
@@ -65,12 +65,12 @@ ML_error <- function(data, newdata, importance_measure, add.vars = NULL, rdit = 
             Logistic.tempVars <- (importance_measure)[1:i]
             # Logistic.fit <- glm(as.factor(PTSD_binary)~., data = data[, which(names(data)%in%c(depVar, Logistic.tempVars))] , family =
             # 'binomial' )
-            Logistic.fit <- bayesglm(as.factor(PTSD_binary) ~ ., data = data[, which(names(data) %in% c(depVar, indVar, Logistic.tempVars))],
+            Logistic.fit <- arm::bayesglm(as.factor(PTSD_binary) ~ ., data = data[, which(names(data) %in% c(depVar, indVar, Logistic.tempVars))],
                 family = "binomial")
-            Logistic.pred <- predict(Logistic.fit, newdata = newdata[, -which(names(newdata) %in% depVar)], type = "response")
+            Logistic.pred <- stats::predict(Logistic.fit, newdata = newdata[, -which(names(newdata) %in% depVar)], type = "response")
             Logistic.pred.binary <- ifelse(Logistic.pred < 0.5, 0, 1)
             ML.err.vect[i, "ML.err"] <- round(roc.area(as.numeric(newdata[, depVar]) - 1, Logistic.pred)$A, digits = rdit)
-            ML.Confusion[[i]] <- confusionMatrix(as.factor(ifelse(Logistic.pred > 0.5, 1, 0)), newdata[, which(names(newdata) %in%
+            ML.Confusion[[i]] <- caret::confusionMatrix(as.factor(ifelse(Logistic.pred > 0.5, 1, 0)), newdata[, which(names(newdata) %in%
                 depVar)])
             ML.err.vect[i, 1] <- paste0(Logistic.tempVars, collapse = ", ")
 

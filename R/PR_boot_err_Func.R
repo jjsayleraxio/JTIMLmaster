@@ -22,7 +22,7 @@ PR.boot.err.Func <- function(x.train, y.train, x.test, y.test, alphaLevel, famil
 
     PR.err.vect <- data.frame(Model = Model)
     cvGLMNET <- lapply(1:length(alphaLevel), function(x) {
-        cv.glmnet(x.train, y.train, type.measure = "mse", alpha = alphaLevel[x], family = family)
+        glmnet::cv.glmnet(x.train, y.train, type.measure = "mse", alpha = alphaLevel[x], family = family)
     })
     preClassification.test <- lapply(cvGLMNET, function(x) {
         factor(as.vector(predict(x, s = x$lambda.min, newx = x.test, type = type)), levels = c(0, 1))
@@ -32,14 +32,14 @@ PR.boot.err.Func <- function(x.train, y.train, x.test, y.test, alphaLevel, famil
     })
 
     coefs <- lapply(cvGLMNET, function(x) {
-        coef(x, s = "lambda.min")
+        stats::coef(x, s = "lambda.min")
     })
     non0coeff <- lapply(coefs, function(x) {
         x[which(x[, 1] != 0), ]
     })
 
     PR.Confusion.test <- lapply(preClassification.test, function(x) {
-        confusionMatrix(x, y.test)
+        caret::confusionMatrix(x, y.test)
     })
 
     ## For test sets
@@ -58,7 +58,7 @@ PR.boot.err.Func <- function(x.train, y.train, x.test, y.test, alphaLevel, famil
 
     ## For train sets
     PR.Confusion.train <- lapply(preClassification.train, function(x) {
-        confusionMatrix(x, y.train)
+        caret::confusionMatrix(x, y.train)
     })
     PR.err.vect$AUC.train <- unlist(lapply(preClassification.train, function(x) {
         verification::roc.area(as.numeric(y.train) - 1, as.numeric(x) - 1)$A

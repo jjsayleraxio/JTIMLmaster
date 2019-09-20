@@ -24,8 +24,8 @@ NN.boot.err.Func <- function(train, test, depVar, hidden = 3, linear.output = FA
     names(train)[1] <- depVar
     n <- names(train)
     n <- n[n!=depVar]
-    f <- as.formula(paste(depVar, paste(n, collapse = " + "), sep = " ~ "))
-    fit <- neuralnet(f, data = train)
+    f <- stats::as.formula(paste(depVar, paste(n, collapse = " + "), sep = " ~ "))
+    fit <- neuralnet::neuralnet(f, data = train)
 
     Outcome <- as.numeric(test[, names(test)%in%depVar]) - 1
     max = apply(test[, names(test) != depVar], 2, max)
@@ -42,7 +42,7 @@ NN.boot.err.Func <- function(train, test, depVar, hidden = 3, linear.output = FA
     AUC.test <- verification::roc.area(as.numeric(test[, which(names(test) %in% depVar)]), as.numeric(Prediction.test$net.result[,
         1]))$A
     test.out <-
-    Conf.test.Mat <- confusionMatrix(factor(ifelse(Prediction.test$net.result[, 1] > 0.5, 1, 0)),
+    Conf.test.Mat <- caret::confusionMatrix(factor(ifelse(Prediction.test$net.result[, 1] > 0.5, 1, 0)),
                                      factor(test[, which(names(test) %in% depVar)]))
     Sensitivity.test <- Conf.test.Mat$byClass["Sensitivity"]
     Specificity.test <- Conf.test.Mat$byClass["Specificity"]
@@ -54,7 +54,7 @@ NN.boot.err.Func <- function(train, test, depVar, hidden = 3, linear.output = FA
     ## For train sets
     AUC.train <- verification::roc.area(as.numeric(train[, which(names(train) %in% depVar)]), as.numeric(Prediction.train$net.result[,
         1]))$A
-    Conf.train.Mat <- confusionMatrix(as.factor(ifelse(Prediction.train$net.result[, 1] > 0.5, 1, 0)), as.factor(train[, which(names(train) %in%
+    Conf.train.Mat <- caret::confusionMatrix(as.factor(ifelse(Prediction.train$net.result[, 1] > 0.5, 1, 0)), as.factor(train[, which(names(train) %in%
         depVar)]))
     Sensitivity.train <- Conf.train.Mat$byClass["Sensitivity"]
     Specificity.train <- Conf.train.Mat$byClass["Specificity"]

@@ -26,7 +26,7 @@ GBM.boot.err.Func <- function(train, test, depVar, distribution = "adaboost", n.
 
   ## For test sets
   AUC.test <- verification::roc.area(as.numeric(test[, which(names(test) %in% depVar)]) - 1, as.numeric(Prediction.test) - 1)$A
-  Conf.test.Mat <- confusionMatrix(as.factor(Prediction.test), test[, which(names(test) %in% depVar)])
+  Conf.test.Mat <- caret::confusionMatrix(as.factor(Prediction.test), test[, which(names(test) %in% depVar)])
   Sensitivity.test <- Conf.test.Mat$byClass["Sensitivity"]
   Specificity.test <- Conf.test.Mat$byClass["Specificity"]
   Misclassification.test <- (Conf.test.Mat$table[1, 2] + Conf.test.Mat$table[2, 1])/(sum(Conf.test.Mat$table))
@@ -37,7 +37,7 @@ GBM.boot.err.Func <- function(train, test, depVar, distribution = "adaboost", n.
   ## For train sets
   AUC.train <- verification::roc.area(as.numeric(train[, which(names(train) %in% depVar)]) - 1, as.numeric(Prediction.train) -
                                         1)$A
-  Conf.train.Mat <- confusionMatrix(as.factor(Prediction.train), train[, which(names(train) %in% depVar)])
+  Conf.train.Mat <- caret::confusionMatrix(as.factor(Prediction.train), train[, which(names(train) %in% depVar)])
   Sensitivity.train <- Conf.train.Mat$byClass["Sensitivity"]
   Specificity.train <- Conf.train.Mat$byClass["Specificity"]
   Misclassification.train <- (Conf.train.Mat$table[1, 2] + Conf.train.Mat$table[2, 1])/(sum(Conf.train.Mat$table))
