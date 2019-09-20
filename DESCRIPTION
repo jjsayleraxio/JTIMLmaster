@@ -10,7 +10,9 @@ Description: This package is developped for JTI R training session. It shows how
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
+biocViews:
 Imports:
+	arm,
 	openxlsx,
 	dplyr,
 	plyr,
@@ -19,6 +21,7 @@ Imports:
 	ggplot2,
 	RColorBrewer,
 	edgeR,
+	sva,
 	Biobase,
 	DESeq2,
 	car,
@@ -31,7 +34,12 @@ Imports:
 	neuralnet,
 	gbm,
 	pheatmap,
-	preprocessCore
+	preprocessCore,
+	reshape2,
+	pROC,
+	limma,
+	verification,
+	isva
 Suggests: 
     knitr,
     rmarkdown,
