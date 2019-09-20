@@ -57,12 +57,12 @@ Can you build a machine learning model to accurately predict whether or not the 
 
 This vignette was created to show how to apply Machine Learning approaches into a diabete data 
 ```{r ML application}
-diabete_dat$Outcome <- factor(diabete_dat$Outcome, levels = c("0", "1"))
-## The data name is diabete_dat 
+diabetes_data$Outcome <- factor(diabetes_data$Outcome, levels = c("0", "1"))
+## The data name is diabetes_data 
 set.seed(415)
 K <- 10       ## Number of replicates 
-n.case <- which(diabete_dat$Outcome==1)
-n.control <- which(diabete_dat$Outcome==0)
+n.case <- which(diabetes_data$Outcome==1)
+n.control <- which(diabetes_data$Outcome==0)
 
 train_rows <- lapply(1:K, function(x){c(sample(n.case, length(n.case), replace = TRUE), sample(n.control, length(n.control), replace = TRUE))})
 
@@ -72,24 +72,24 @@ alphaLevel <- c(0.4, 0.7, 1)
 
 ntree <- 100
 
-RFresult <- lapply(train_rows, function(x){RF.boot.err.Func(train=diabete_dat[x, ], test=diabete_dat[-x, ], depVar = depVar, ntree=ntree)})
+RFresult <- lapply(train_rows, function(x){RF.boot.err.Func(train=diabetes_data[x, ], test=diabetes_data[-x, ], depVar = depVar, ntree=ntree)})
 names(RFresult) <- paste0("RF_iter", 1:K)
 
-PRresult <- lapply(train_rows, function(x){PR.boot.err.Func(x.train=diabete_dat[x, (names(diabete_dat)!=depVar)], y.train=diabete_dat[x, depVar], x.test=diabete_dat[-x, (names(diabete_dat)!=depVar)], y.test=diabete_dat[-x, depVar], alphaLevel=alphaLevel, family="binomial", type="class")})
+PRresult <- lapply(train_rows, function(x){PR.boot.err.Func(x.train=diabetes_data[x, (names(diabetes_data)!=depVar)], y.train=diabetes_data[x, depVar], x.test=diabetes_data[-x, (names(diabetes_data)!=depVar)], y.test=diabetes_data[-x, depVar], alphaLevel=alphaLevel, family="binomial", type="class")})
 names(PRresult) <- paste0("PR_iter", 1:K)
 
 ### SVM ###
-SVMresult  <-  lapply(train_rows, function(x){SVM.boot.err.Func(train=diabete_dat[x, ], test=diabete_dat[-x, ], depVar= depVar, kernel="radial", cost=5)})
+SVMresult  <-  lapply(train_rows, function(x){SVM.boot.err.Func(train=diabetes_data[x, ], test=diabetes_data[-x, ], depVar= depVar, kernel="radial", cost=5)})
 names(SVMresult) <- paste0("SVM_iter", 1:K)
 
 ### Neural Network ###
-NNresult  <-  lapply(train_rows, function(x){NN.boot.err.Func(train=diabete_dat[x, ], test=diabete_dat[-x, ], depVar= depVar, hidden=10)})
+NNresult  <-  lapply(train_rows, function(x){NN.boot.err.Func(train=diabetes_data[x, ], test=diabetes_data[-x, ], depVar= depVar, hidden=10)})
 names(NNresult) <- paste0("NN_iter", 1:K)
 
 ### Gredient Boosting (gbm R package) ###
 ### Somehow predicted values are all 0. So we cannot compare them to the true values. 
 
-GBMresult  <-  lapply(train_rows, function(x){GBM.boot.err.Func(train=diabete_dat[x, ], test=diabete_dat[-x, ], depVar= depVar, distribution="adaboost", n.trees = ntree)})
+GBMresult  <-  lapply(train_rows, function(x){GBM.boot.err.Func(train=diabetes_data[x, ], test=diabetes_data[-x, ], depVar= depVar, distribution="adaboost", n.trees = ntree)})
 names(GBMresult) <- paste0("GBM_iter", 1:K)
 ```
 
