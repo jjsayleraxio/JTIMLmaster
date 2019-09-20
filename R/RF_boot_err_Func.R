@@ -12,7 +12,7 @@
 #'   importance_measure as a matrix form of Mean.Decrease.Accuracy and Mean.Decrease.Gini
 #' @export
 
-RF.boot.err.Func <- function(train, test, depVar, ntree = 300) {
+RF.boot.err.Func <- function(train, test, depvar, ntree = 300) {
     variables <- names(train)
     variables <- variables[variables!=depVar]
     f <- as.formula(paste(depVar, paste(variables, collapse = " + "), sep = " ~ "))

@@ -7,6 +7,9 @@
 #' @inheritParams RF.boot.err.Func A data frame of training data set
 #' @param kernel A kernel function to be used.
 #' @param cost A cost?
+#' @param train ??
+#' @param test ??
+#' @param depVar ??
 #' @return A SVM.err a matrix of the estimated accurasy measures of Sensitivity, Specificity, and Misclassification for Training set, Testing set and overall one.
 #' @export
 

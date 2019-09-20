@@ -6,6 +6,10 @@
 #'
 #' @inheritParams RF.boot.err.Func A data frame of training data set
 #' @param hidden A numeric value of # of hidden layers
+#' @param train ??
+#' @param test ??
+#' @param depVar ??
+#' @param linear.output ??
 #' @return A NN.err a matrix of the estimated accurasy measures of Sensitivity, Specificity, and Misclassification for Training set, Testing set and overall one.
 #' @export
 

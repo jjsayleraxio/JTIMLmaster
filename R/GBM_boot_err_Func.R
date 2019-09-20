@@ -5,9 +5,14 @@
 #' A GBM model is trained using a training data set and estimate accuracy measures using a test data set. The number of tree is defined by a user and the default value of it is 300.
 #'
 #' @inheritParams RF.boot.err.Func A data frame of training data set
-#' @param kernel A kernel function to be used.
-#' @param cost A cost?
-#' @return A GBM.err a matrix of the estimated accurasy measures of Sensitivity, Specificity, and Misclassification for Training set, Testing set and overall one.
+#' param kernel A kernel function to be used.
+#' param cost A cost?
+#' @param train ??
+#' @param test ??
+#' @param depVar ??
+#' @param distribution ??
+#' @param n.trees ??
+#' @return A GBM.err matrix of the estimated accuracy measurements of Sensitivity, Specificity, and Misclassification for Training set, Testing set and overall one.
 #' @export
 
 GBM.boot.err.Func <- function(train, test, depVar, distribution = "adaboost", n.trees = 500) {
