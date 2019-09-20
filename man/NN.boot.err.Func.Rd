@@ -8,7 +8,15 @@ NN.boot.err.Func(train, test, depVar, hidden = 3,
   linear.output = FALSE)
 }
 \arguments{
+\item{train}{??}
+
+\item{test}{??}
+
+\item{depVar}{??}
+
 \item{hidden}{A numeric value of # of hidden layers}
+
+\item{linear.output}{??}
 }
 \value{
 A NN.err a matrix of the estimated accurasy measures of Sensitivity, Specificity, and Misclassification for Training set, Testing set and overall one.

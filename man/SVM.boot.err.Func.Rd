@@ -7,6 +7,12 @@
 SVM.boot.err.Func(train, test, depVar, kernel = "radial", cost = 5)
 }
 \arguments{
+\item{train}{??}
+
+\item{test}{??}
+
+\item{depVar}{??}
+
 \item{kernel}{A kernel function to be used.}
 
 \item{cost}{A cost?}

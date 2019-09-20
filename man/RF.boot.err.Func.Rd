@@ -4,16 +4,16 @@
 \alias{RF.boot.err.Func}
 \title{Application of Random Forest method}
 \usage{
-RF.boot.err.Func(train, test, depVar, ntree = 300)
+RF.boot.err.Func(train, test, depvar, ntree = 300)
 }
 \arguments{
 \item{train}{A data frame of training data set}
 
 \item{test}{A data frame of a testing data}
 
-\item{ntree}{A numeric value of # of trees to build}
-
 \item{depvar}{An outcome variable}
+
+\item{ntree}{A numeric value of # of trees to build}
 }
 \value{
 A list of RF.fit RF fitted object, RF.err a matrix of the estimated accurasy measures of Sensitivity, Specificity, Misclassification for Training set, Testing set and overall one,

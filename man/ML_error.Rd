@@ -5,7 +5,7 @@
 \title{Application of each ML method to a testing set}
 \usage{
 ML_error(data, newdata, importance_measure, add.vars = NULL, rdit = 4,
-  depVar = depVar, indVar = indVar, ML = c("RF", "BOOST",
+  depvar = depVar, indvar = indVar, ML = c("RF", "BOOST",
   "Logistic"))
 }
 \arguments{
@@ -15,11 +15,15 @@ ML_error(data, newdata, importance_measure, add.vars = NULL, rdit = 4,
 
 \item{importance_measure}{A vector of importance measures obtained from Random Forest model}
 
-\item{ML}{A ML method to apply}
+\item{add.vars}{??}
+
+\item{rdit}{??}
+
+\item{depvar}{An outcome variable}
 
 \item{indvar}{A list of candidate predictors}
 
-\item{depvar}{An outcome variable}
+\item{ML}{A ML method to apply}
 }
 \value{
 ML.err.vect A data frame including estimated accuracy measures

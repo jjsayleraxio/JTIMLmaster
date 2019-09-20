@@ -8,12 +8,18 @@ GBM.boot.err.Func(train, test, depVar, distribution = "adaboost",
   n.trees = 500)
 }
 \arguments{
-\item{kernel}{A kernel function to be used.}
+\item{train}{??}
 
-\item{cost}{A cost?}
+\item{test}{??}
+
+\item{depVar}{??}
+
+\item{distribution}{??}
+
+\item{n.trees}{??}
 }
 \value{
-A GBM.err a matrix of the estimated accurasy measures of Sensitivity, Specificity, and Misclassification for Training set, Testing set and overall one.
+A GBM.err matrix of the estimated accuracy measurements of Sensitivity, Specificity, and Misclassification for Training set, Testing set and overall one.
 }
 \description{
 Returns the estimated accurasy measures of Sensitivity, Specificity, and Misclassification using Confusion matrix.
