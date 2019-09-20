@@ -1,6 +1,8 @@
 # JTIMLmaster
 
-__By__: Sangsoon Woo, Consultant, Cytel
+__Author__: Sangsoon Woo, Consultant, Cytel
+
+__Maintainer__: Joseph Sayler, Analyst, Cytel
 
 ### INTRODUCTION
 
