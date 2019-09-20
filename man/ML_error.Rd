@@ -5,7 +5,7 @@
 \title{Application of each ML method to a testing set}
 \usage{
 ML_error(data, newdata, importance_measure, add.vars = NULL, rdit = 4,
-  depvar = depVar, indvar = indVar, ML = c("RF", "BOOST",
+  depVar = depVar, indVar = indVar, ML = c("RF", "BOOST",
   "Logistic"))
 }
 \arguments{
@@ -19,9 +19,9 @@ ML_error(data, newdata, importance_measure, add.vars = NULL, rdit = 4,
 
 \item{rdit}{??}
 
-\item{depvar}{An outcome variable}
+\item{depVar}{An outcome variable}
 
-\item{indvar}{A list of candidate predictors}
+\item{indVar}{A list of candidate predictors}
 
 \item{ML}{A ML method to apply}
 }

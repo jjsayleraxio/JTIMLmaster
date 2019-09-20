@@ -6,13 +6,13 @@
 #'
 #' @param train A data frame of training data set
 #' @param test A data frame of a testing data
-#' @param depvar An outcome variable
+#' @param depVar An outcome variable
 #' @param ntree A numeric value of # of trees to build
 #' @return A list of RF.fit RF fitted object, RF.err a matrix of the estimated accurasy measures of Sensitivity, Specificity, Misclassification for Training set, Testing set and overall one,
 #'   importance_measure as a matrix form of Mean.Decrease.Accuracy and Mean.Decrease.Gini
 #' @export
 
-RF.boot.err.Func <- function(train, test, depvar, ntree = 300) {
+RF.boot.err.Func <- function(train, test, depVar, ntree = 300) {
     variables <- names(train)
     variables <- variables[variables!=depVar]
     f <- as.formula(paste(depVar, paste(variables, collapse = " + "), sep = " ~ "))

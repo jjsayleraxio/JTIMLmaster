@@ -8,8 +8,8 @@
 #'
 #' @param data A matrix of the whole training data set for coefficients' esimates
 #' @param newdata A matrix of a testing data
-#' @param indvar A list of candidate predictors
-#' @param depvar An outcome variable
+#' @param indVar A list of candidate predictors
+#' @param depVar An outcome variable
 #' @param importance_measure A vector of importance measures obtained from Random Forest model
 #' @param ML A ML method to apply
 #' @param add.vars ??
@@ -17,7 +17,7 @@
 #' @return ML.err.vect A data frame including estimated accuracy measures
 #' @export
 
-ML_error <- function(data, newdata, importance_measure, add.vars = NULL, rdit = 4, depvar = depVar, indvar = indVar, ML = c("RF", "BOOST", "Logistic")) {
+ML_error <- function(data, newdata, importance_measure, add.vars = NULL, rdit = 4, depVar = depVar, indVar = indVar, ML = c("RF", "BOOST", "Logistic")) {
     if (is.null(importance_measure)) {
         importance_measure <- NULL
     } else {
