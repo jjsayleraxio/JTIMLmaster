@@ -4,7 +4,7 @@ author: "Sangsoon Woo, Cytel"
 date: "September 24, 2019"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{JTIMLmaster-vignette}
+  %\VignetteIndexEntry{Diabetes-Data}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
