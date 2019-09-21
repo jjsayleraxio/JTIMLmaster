@@ -1,3 +1,6 @@
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/jjsayleraxio/JTIMLmaster?label=current%20release)
+![GitHub Release Date](https://img.shields.io/github/release-date/jjsayleraxio/JTIMLmaster)
+
 # JTIMLmaster
 
 __Author__: Sangsoon Woo, Consultant, Cytel
